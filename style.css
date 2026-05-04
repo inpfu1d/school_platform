@@ -108,38 +108,27 @@ body {
   cursor: pointer;
   transition: opacity 0.2s;
 }
+
 .header-brand:hover {
   opacity: 0.8;
 }
-}
 
-/* Logo wrapper — visible placeholder until logo.png is uploaded */
 .logo-wrap {
-  width: 90px;
+  width: 100px;
   height: 60px;
   flex-shrink: 0;
   border-radius: 10px;
-  border: 2px dashed var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  background: var(--accent-light);
-  transition: border-color var(--transition), background var(--transition);
-  overflow: hidden;
-}
-
-/* Once logo.png loads successfully, remove the dashed border */
-.logo-wrap.logo--loaded {
-  border: none;
-  background: transparent;
+  overflow: hidden; /* هذا السطر هو الذي يمنع الشعار من الانفجار */
 }
 
 .logo {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  border-radius: 8px;
+  object-fit: contain; /* هذا السطر يضمن ظهور الشعار كاملاً بدون قص أو تشويه */
   position: relative;
   z-index: 1;
 }
