@@ -814,5 +814,9 @@ async function init() {
   updateGradeRings();
   showView('home');
 }
-
+// تفعيل العودة للرئيسية عند الضغط على الشعار
+document.querySelector('.header-brand').addEventListener('click', () => {
+  playClick();
+  navigateHome();
+});
 init();
