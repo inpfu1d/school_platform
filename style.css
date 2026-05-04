@@ -105,12 +105,18 @@ body {
   gap: 0.75rem;
   flex: 1;
   min-width: 0;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.header-brand:hover {
+  opacity: 0.8;
+}
 }
 
 /* Logo wrapper — visible placeholder until logo.png is uploaded */
 .logo-wrap {
-  width: 50px;
-  height: 50px;
+  width: 90px;
+  height: 60px;
   flex-shrink: 0;
   border-radius: 10px;
   border: 2px dashed var(--accent);
