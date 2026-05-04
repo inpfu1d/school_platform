@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>منصة المهارات الرقمية التعليمية</title>
+  <link rel="stylesheet" href="./style.css?v=9" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <div class="logo-wrap" id="logo-wrap">
+          <img src="./logo.png" alt="شعار المدرسة" class="logo"
+               onload="document.getElementById('logo-wrap').classList.add('logo--loaded')"
+               onerror="this.style.display='none'" />
+          <span class="logo-fallback" aria-hidden="true">🏫</span>
+        </div>
+        <h1 class="site-title">منصة المهارات الرقمية التعليمية</h1>
+      </div>
+
+      <div class="progress-badge" id="progress-badge" data-total="0" aria-live="polite">
+        <span class="progress-badge__icon">🏆</span>
+        <span class="progress-badge__text">
+          <span id="progress-count">0</span>/<span id="progress-total">0</span>
+        </span>
+        <span class="progress-badge__label">مُنجز</span>
+      </div>
+
+      <div class="header-actions">
+        <button id="btn-report" class="btn-report" aria-label="تقرير الإنجازات" title="عرض تقرير الإنجازات">
+          📋 <span class="btn-report__label">تقريري</span>
+        </button>
+        <button id="btn-reset" class="btn-reset" aria-label="إعادة تعيين الإنجازات" title="مسح جميع الإنجازات">
+          🗑
+        </button>
+        <button id="theme-toggle" class="btn-theme" aria-label="تبديل الوضع">
+          <span class="icon-sun">☀️</span>
+          <span class="icon-moon">🌙</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- BREADCRUMBS -->
+  <nav class="breadcrumbs" id="breadcrumbs" aria-label="مسار التنقل" hidden>
+    <span id="breadcrumb-trail"></span>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- Level 1: Grades -->
+    <section id="view-home" class="view active">
+      <div class="welcome-banner">
+        <div class="welcome-icon">🎮</div>
+        <h2>مرحباً بك في منصة الألعاب التعليمية</h2>
+        <p>اختر صفك الدراسي للبدء بالتعلم والمتعة</p>
+      </div>
+      <div class="cards-grid" id="grades-grid"></div>
+    </section>
+
+    <!-- Level 2: Terms -->
+    <section id="view-terms" class="view">
+      <div class="cards-grid cards-grid--2" id="terms-grid"></div>
+    </section>
+
+    <!-- Level 3: Games Library -->
+    <section id="view-games" class="view">
+      <div class="search-bar-wrapper">
+        <input
+          type="search"
+          id="search-input"
+          class="search-input"
+          placeholder="🔍  ابحث عن لعبة..."
+          aria-label="بحث عن لعبة"
+        />
+      </div>
+      <div class="share-bar" id="share-bar" hidden>
+        <button class="btn-share" id="btn-share">شارك إنجازك 🏆</button>
+      </div>
+      <div class="cards-grid" id="games-grid"></div>
+      <div class="empty-state" id="empty-state" hidden>
+        <span>😕</span>
+        <p>لا توجد ألعاب تطابق بحثك</p>
+      </div>
+      <div class="coming-soon-state" id="coming-soon-state" hidden>
+        <span class="coming-soon-state__icon">⏳</span>
+        <p class="coming-soon-state__title">قريباً!</p>
+        <p class="coming-soon-state__sub">جاري تجهيز ألعاب هذا القسم</p>
+      </div>
+    </section>
+
+    <!-- Level 4: Game View -->
+    <section id="view-game" class="view">
+      <button class="btn-back" id="btn-back">🔙 العودة لمكتبة الألعاب</button>
+      <div class="iframe-wrapper">
+        <iframe id="game-iframe" src="" title="اللعبة" allowfullscreen></iframe>
+      </div>
+      <div class="worksheet-alert" role="alert">
+        <span class="worksheet-alert__icon">💡</span>
+        <p><strong>تنبيه:</strong> إذا لم تكن إجاباتك صحيحة بنسبة عالية في اللعبة، ننصحك بمراجعة أوراق العمل الخاصة بالدرس بشكل جيد.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER — triple-click the text to unlock Teacher View -->
+  <footer class="site-footer">
+    <p id="footer-secret" class="footer-secret">جميع الحقوق محفوظة لـ أ. أحمد عبدالله باعباد &copy; 2026</p>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- CERTIFICATE / PROGRESS REPORT OVERLAY -->
+  <div id="cert-overlay" class="cert-overlay" hidden aria-modal="true" role="dialog" aria-labelledby="cert-heading">
+    <div class="cert-backdrop" id="cert-backdrop"></div>
+    <div class="certificate" id="certificate">
+
+      <!-- Screen-only controls -->
+      <div class="cert-actions">
+        <button class="cert-btn-print" id="cert-btn-print">🖨️ طباعة الشهادة</button>
+        <button class="cert-btn-close" id="cert-btn-close" aria-label="إغلاق">✕</button>
+      </div>
+
+      <!-- Certificate top decoration -->
+      <div class="cert-ornament cert-ornament--top" aria-hidden="true">
+        ❖ &nbsp; ❖ &nbsp; ❖
+      </div>
+
+      <!-- Header -->
+      <div class="cert-header">
+        <div class="cert-trophy" aria-hidden="true">🏆</div>
+        <h1 class="cert-title" id="cert-heading">شهادة إنجاز</h1>
+        <p class="cert-platform-name">منصة المهارات الرقمية التعليمية</p>
+      </div>
+
+      <!-- Student name field -->
+      <div class="cert-student">
+        <span class="cert-student__label">اسم الطالب / الطالبة:</span>
+        <span class="cert-student__line" aria-label="اكتب اسمك هنا بعد الطباعة"></span>
+      </div>
+
+      <!-- Divider -->
+      <div class="cert-divider" aria-hidden="true"></div>
+
+      <!-- Dynamic grade summary — filled by JS -->
+      <div class="cert-body" id="cert-body"></div>
+
+      <!-- Divider -->
+      <div class="cert-divider" aria-hidden="true"></div>
+
+      <!-- Footer -->
+      <div class="cert-footer">
+        <p class="cert-slogan">استمر في التعلم والإبداع! 🚀</p>
+        <p class="cert-date" id="cert-date"></p>
+      </div>
+
+      <!-- Bottom decoration -->
+      <div class="cert-ornament cert-ornament--bottom" aria-hidden="true">
+        ❖ &nbsp; ❖ &nbsp; ❖
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TEACHER VIEW MODAL (secret — no visible trigger) -->
+  <div id="tv-overlay" class="tv-overlay" hidden aria-modal="true" role="dialog" aria-labelledby="tv-heading">
+    <div class="tv-backdrop" id="tv-backdrop"></div>
+    <div class="tv-modal">
+
+      <div class="tv-header">
+        <div class="tv-header__brand">
+          <span class="tv-header__icon" aria-hidden="true">👨‍🏫</span>
+          <h2 class="tv-header__title" id="tv-heading">لوحة المعلم — منصة المهارات الرقمية</h2>
+        </div>
+        <button class="tv-close" id="tv-close" aria-label="إغلاق">✕</button>
+      </div>
+
+      <nav class="tv-tabs" role="tablist">
+        <button class="tv-tab tv-tab--active" id="tv-tab-btn-view" role="tab" aria-selected="true" aria-controls="tv-panel-view">📋 عرض المنهج</button>
+        <button class="tv-tab" id="tv-tab-btn-edit" role="tab" aria-selected="false" aria-controls="tv-panel-edit">✏️ محرر الألعاب</button>
+      </nav>
+
+      <div class="tv-panel tv-panel--active" id="tv-panel-view" role="tabpanel" aria-labelledby="tv-tab-btn-view">
+        <div class="tv-stats" id="tv-stats"></div>
+        <div class="tv-body" id="tv-body"></div>
+      </div>
+
+      <div class="tv-panel" id="tv-panel-edit" role="tabpanel" aria-labelledby="tv-tab-btn-edit">
+        <div class="tv-editor-toolbar">
+          <button class="tv-editor-btn tv-editor-btn--add" id="tv-btn-add">➕ إضافة لعبة جديدة</button>
+          <button class="tv-editor-btn tv-editor-btn--export" id="tv-btn-export">📥 تصدير games.json</button>
+        </div>
+        <div class="tv-editor-list" id="tv-editor-list"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="./script.js"></script>
+</body>
+</html>

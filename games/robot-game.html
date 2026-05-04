@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مختبر الروبوت الذكي: مسار VEX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0F172A;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --primary: #06b6d4;
+            --secondary: #8b5cf6;
+            --text-light: #f8fafc;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --track-color: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at top right, rgba(139, 92, 246, 0.15), transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(6, 182, 212, 0.15), transparent 40%);
+            overflow: hidden;
+            padding: 10px;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 680px;
+            text-align: center;
+            position: relative;
+        }
+
+        /* Driving Track Section */
+        .track-container {
+            position: relative;
+            width: 100%;
+            height: 110px;
+            background: linear-gradient(to bottom, #0f172a 0%, var(--track-color) 100%);
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-bottom: 5px dashed rgba(255, 255, 255, 0.15);
+            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        .finish-line {
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 25px;
+            background: repeating-linear-gradient(45deg, #fff, #fff 10px, #000 10px, #000 20px);
+            border-radius: 5px;
+            opacity: 0.9;
+            z-index: 5;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+        }
+
+        .finish-glow {
+            box-shadow: 0 0 30px 10px rgba(16, 185, 129, 0.8);
+        }
+
+        .robot-img {
+            position: absolute;
+            bottom: 5px;
+            right: 15px; /* Starts at the right (RTL) */
+            width: 85px;
+            height: auto;
+            transition: right 0.8s cubic-bezier(0.25, 1, 0.5, 1), filter 0.3s, transform 0.3s;
+            z-index: 10;
+        }
+
+        /* Animations for Robot */
+        .robot-glow { filter: drop-shadow(0 0 15px var(--primary)); }
+        
+        @keyframes shakeError {
+            0%, 100% { transform: translateX(0); filter: drop-shadow(0 0 10px var(--danger)); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+        .robot-error { animation: shakeError 0.5s ease-in-out; }
+
+        @keyframes jumpCelebrate {
+            0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 10px #fbbf24); }
+            50% { transform: translateY(-30px) scale(1.1); filter: drop-shadow(0 0 30px #fbbf24); }
+        }
+        .robot-celebrate { animation: jumpCelebrate 1s ease-in-out infinite; }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px 25px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        /* Options */
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn-option {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: right;
+        }
+
+        .btn-option:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .btn-option.correct {
+            background-color: var(--success);
+            border-color: var(--success);
+            color: white;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-option.wrong {
+            background-color: var(--danger);
+            border-color: var(--danger);
+            color: white;
+            opacity: 0.9;
+        }
+
+        /* Explanation Box */
+        .explanation-box {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1.5px dashed var(--danger);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #fca5a5;
+            text-align: right;
+            animation: fadeIn 0.4s ease;
+        }
+        .explanation-box strong { color: white; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* End Screen */
+        .end-screen { display: none; }
+        
+        .end-screen h2 {
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .score-text {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .teacher-note {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--warning);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #fcd34d;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            padding: 15px 35px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(6, 182, 212, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <!-- Driving Track -->
+        <div class="track-container" id="track">
+            <div class="finish-line" id="finish-line"></div>
+            <!-- Make sure to use 'vex.png' -->
+            <img src="vex.png" alt="VEX Robot" class="robot-img" id="robot">
+        </div>
+
+        <!-- Quiz Section -->
+        <div class="glass-card" id="quiz-card">
+            <div class="question-header">
+                <span id="q-counter">سؤال 1 من 15</span>
+                <span id="live-score">الرصيد: 0</span>
+            </div>
+            <div class="question-text" id="question">جاري تحميل التحدي...</div>
+            <div class="options-grid" id="options"></div>
+            <div class="explanation-box" id="explanation"></div>
+        </div>
+
+        <!-- End Screen Section -->
+        <div class="glass-card end-screen" id="end-screen">
+            <h2 id="end-title">انتهى التحدي!</h2>
+            <div class="score-text">نتيجتك النهائية: <span id="score">0</span> من 15</div>
+            
+            <!-- Teacher Reminder Note -->
+            <div class="teacher-note">
+                💡 <strong>تنبيه هام من المعلم:</strong><br>
+                هذه اللعبة مصممة لمراجعة معلوماتك وتثبيتها بمتعة، ولكنها <strong>لا تغني أبداً عن مراجعة أوراق العمل والمذكرة الأساسية للمنهج</strong>. تأكد من مذاكرة مصادرك جيداً للاستعداد للاختبارات!
+            </div>
+
+            <button class="btn-primary" onclick="restartGame()">إعادة التحدي 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        // 15 Questions with Explanations
+        const questions = [
+            {
+                q: "ما هي الحاسة البشرية التي يماثلها مستشعر الاصطدام في الروبوت؟",
+                options: ["الرؤية", "السمع", "اللمس"],
+                answer: 2,
+                exp: "مستشعر الاصطدام يعمل عند الاحتكاك أو الاصطدام المادي بالأشياء، تماماً مثل حاسة اللمس."
+            },
+            {
+                q: "من أمثلة مستشعرات الاصطدام المستخدمة في المكانس الروبوتية المنزلية مستشعر:",
+                options: ["الجدار", "الزلازل", "القوة العضلية"],
+                answer: 0,
+                exp: "تستخدم المكنسة مستشعر (الجدار) لتعرف أنها اصطدمت بحاجز فتقوم بتغيير مسارها."
+            },
+            {
+                q: "يستخدم مستشعر المسافة بالليزر لتوضيح المسافة بين الروبوت وأقرب كائن، ويقع غالباً في:",
+                options: ["الجزء الخلفي", "الجزء الأمامي", "الجزء الأيمن"],
+                answer: 1,
+                exp: "يقع في الجزء الأمامي ليكون بمثابة عين للروبوت يرى بها ما أمامه قبل الاصطدام به."
+            },
+            {
+                q: "أي المستشعرات يستخدم في السيارات لأنظمة السلامة المضادة للتصادم والوقوف الذاتي؟",
+                options: ["مستشعر الموجات فوق الصوتية", "مستشعر الضوء", "مستشعر الألوان"],
+                answer: 0,
+                exp: "الموجات فوق الصوتية (Ultrasonic) ترسل موجات صوتية وترتد لتحسب المسافة بدقة عالية للسيارات."
+            },
+            {
+                q: "لكتابة ملاحظات داخل الكود لمساعدة فريق العمل على فهمه دون أن ينفذها الروبوت، نستخدم:",
+                options: ["المتغيرات", "التكرارات", "التعليقات"],
+                answer: 2,
+                exp: "التعليقات (Comments) هي نصوص يقرأها الإنسان فقط، ويتجاهلها الحاسب والروبوت تماماً أثناء التنفيذ."
+            },
+            {
+                q: "صح أم خطأ: يمكن العثور على لبنة مستشعر الاصطدام في فئة (التحكم).",
+                options: ["صح", "خطأ"],
+                answer: 1,
+                exp: "خطأ. جميع المستشعرات توجد في فئة (الاستشعار - Sensing) وليس التحكم."
+            },
+            {
+                q: "صح أم خطأ: يعمل مستشعر الاصطدام مثل الزر؛ إما أن يكون مضغوطاً (1) أو غير مضغوط (0).",
+                options: ["صح", "خطأ"],
+                answer: 0,
+                exp: "إجابة صحيحة. مستشعر الاصطدام يعطي قيمتين فقط: نعم يوجد اصطدام (مضغوط)، أو لا يوجد (غير مضغوط)."
+            },
+            // New Extrapolated Questions
+            {
+                q: "في منصة VEX VR، المستشعر الذي يكتشف ألوان العقبات أو الخطوط المحيطة يسمى:",
+                options: ["مستشعر العين / الألوان", "مستشعر الموقع", "مستشعر الجيروسكوب"],
+                answer: 0,
+                exp: "مستشعر العين (Eye Sensor) يمكنه اكتشاف الألوان مثل الأحمر والأخضر والأزرق."
+            },
+            {
+                q: "إذا أردت أن يتوقف الروبوت قبل أن يصطدم بالحائط بمسافة 50 مم، ستستخدم مستشعر:",
+                options: ["اللمس", "المسافة", "الألوان"],
+                answer: 1,
+                exp: "لأن مستشعر المسافة يقيس البعد قبل الوصول للهدف، بينما مستشعر اللمس يحتاج للاصطدام الفعلي."
+            },
+            {
+                q: "في برمجة VEX، يتم إدخال لبنات الاستشعار (السداسية) عادة داخل لبنات:",
+                options: ["التحكم (مثل: انتظر حتى، إذا..إذن)", "الحركة (مثل: تحرك للأمام)", "التعليقات"],
+                answer: 0,
+                exp: "لبنات الاستشعار السداسية تُستخدم كـ (شروط) داخل أوامر التحكم لاتخاذ القرارات."
+            },
+            {
+                q: "لحماية المكنسة الروبوتية من السقوط من الدرج، أين يجب توجيه مستشعر المسافة؟",
+                options: ["للأعلى", "للخلف", "للأسفل"],
+                answer: 2,
+                exp: "يُوجه للأسفل (مستشعر حافة) لاكتشاف الفراغات أو السلالم لمنع الروبوت من السقوط."
+            },
+            {
+                q: "صح أم خطأ: لا تستطيع الروبوتات اتخاذ قرارات ذكية بدون استخدام المستشعرات.",
+                options: ["صح", "خطأ"],
+                answer: 0,
+                exp: "صح. المستشعرات هي (الحواس) التي تعطي الروبوت معلومات عن بيئته ليتخذ القرار البرمجي."
+            },
+            {
+                q: "تعتمد المركبات ذاتية القيادة (التي تقود نفسها) بشكل أساسي على المستشعرات لاتخاذ قرارات مثل:",
+                options: ["تشغيل الراديو", "تجنب العقبات والمشاة", "تغيير لون الإضاءة الداخلية"],
+                answer: 1,
+                exp: "الهدف الأمني الأهم للمستشعرات في السيارات الذكية هو تجنب الحوادث والعقبات."
+            },
+            {
+                q: "صح أم خطأ: روبوت الواقع الافتراضي (VEX VR) يمتلك مستشعرات برمجية تحاكي الروبوت الحقيقي تماماً.",
+                options: ["صح", "خطأ"],
+                answer: 0,
+                exp: "صح. منصة VEX VR توفر محاكاة دقيقة جداً للمستشعرات لتطوير مهارات البرمجة قبل تطبيقها واقعياً."
+            },
+            {
+                q: "لكي يتتبع الروبوت خطاً أسود مرسوماً على الأرض دون الخروج عنه، يحتاج بشكل أساسي إلى:",
+                options: ["مستشعر المسافة", "مستشعر الألوان / الضوء", "مستشعر اللمس"],
+                answer: 1,
+                exp: "مستشعر الألوان يقيس نسبة انعكاس الضوء للتمييز بين الخط الأسود والأرضية البيضاء."
+            }
+        ];
+
+        const totalQuestions = questions.length;
+        let currentQuestion = 0;
+        let score = 0;
+        let audioCtx = null;
+
+        // Elements
+        const questionEl = document.getElementById('question');
+        const optionsEl = document.getElementById('options');
+        const expEl = document.getElementById('explanation');
+        const robotEl = document.getElementById('robot');
+        const cardEl = document.getElementById('quiz-card');
+        const qCounterEl = document.getElementById('q-counter');
+        const liveScoreEl = document.getElementById('live-score');
+        const finishLineEl = document.getElementById('finish-line');
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playSound(type) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            if (type === 'success') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.3);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'win') {
+                // Victory Fanfare
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(554, audioCtx.currentTime + 0.2);
+                osc.frequency.setValueAtTime(659, audioCtx.currentTime + 0.4);
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.6);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.2);
+                osc.start(); osc.stop(audioCtx.currentTime + 1.2);
+            }
+        }
+
+        function moveRobot() {
+            // Robot only moves based on CORRECT answers (score)
+            // 15 correct answers = reach the finish line (85% of track + overlap)
+            const progress = (score / totalQuestions);
+            const targetRight = progress * 82; // 82% brings it right to the line
+            robotEl.style.right = `calc(${targetRight}% + 15px)`;
+        }
+
+        function loadQuestion() {
+            expEl.style.display = 'none'; // hide explanation
+            const q = questions[currentQuestion];
+            qCounterEl.textContent = `سؤال ${currentQuestion + 1} من ${totalQuestions}`;
+            liveScoreEl.textContent = `الرصيد: ${score}`;
+            questionEl.textContent = q.q;
+            optionsEl.innerHTML = '';
+            
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-option';
+                btn.textContent = opt;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsEl.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, btnElement) {
+            initAudio();
+            const allBtns = optionsEl.querySelectorAll('.btn-option');
+            allBtns.forEach(b => b.style.pointerEvents = 'none');
+
+            const correctIndex = questions[currentQuestion].answer;
+            const explanation = questions[currentQuestion].exp;
+            let delayToNext = 1500; // Normal delay for correct
+
+            if (selectedIndex === correctIndex) {
+                // CORRECT
+                btnElement.classList.add('correct');
+                playSound('success');
+                score++;
+                robotEl.classList.add('robot-glow');
+                setTimeout(() => robotEl.classList.remove('robot-glow'), 600);
+                moveRobot();
+            } else {
+                // WRONG
+                btnElement.classList.add('wrong');
+                allBtns[correctIndex].classList.add('correct');
+                playSound('wrong');
+                
+                // Show Correction
+                expEl.innerHTML = `<strong>❌ إجابة غير دقيقة!</strong><br>${explanation}`;
+                expEl.style.display = 'block';
+                
+                // Shake robot, NO movement
+                robotEl.classList.add('robot-error');
+                setTimeout(() => robotEl.classList.remove('robot-error'), 500);
+                
+                // Extra time to read explanation
+                delayToNext = 4000; 
+            }
+
+            currentQuestion++;
+
+            setTimeout(() => {
+                if (currentQuestion < totalQuestions) {
+                    loadQuestion();
+                } else {
+                    showEndScreen();
+                }
+            }, delayToNext);
+        }
+
+        function showEndScreen() {
+            document.getElementById('quiz-card').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'block';
+            document.getElementById('score').textContent = score;
+            liveScoreEl.textContent = `الرصيد: ${score}`;
+
+            const endTitle = document.getElementById('end-title');
+
+            if (score === totalQuestions) {
+                // PERFECT SCORE - CRASH/REACH FINISH LINE!
+                robotEl.style.right = 'calc(85% + 20px)'; // Touch the line
+                endTitle.textContent = "🏆 إنجاز مبهر! علامة كاملة";
+                playSound('win');
+                finishLineEl.classList.add('finish-glow');
+                robotEl.classList.add('robot-celebrate');
+            } else {
+                // NOT PERFECT - STOP SHORT
+                endTitle.textContent = "👏 أداء رائع! لكن يمكنك التحسن";
+                endTitle.style.color = "var(--warning)";
+                playSound('success');
+            }
+        }
+
+        function restartGame() {
+            currentQuestion = 0;
+            score = 0;
+            robotEl.style.right = '15px'; // Reset position
+            robotEl.classList.remove('robot-celebrate');
+            finishLineEl.classList.remove('finish-glow');
+            
+            document.getElementById('quiz-card').style.display = 'block';
+            document.getElementById('end-screen').style.display = 'none';
+            loadQuestion();
+        }
+
+        // Start
+        window.onload = loadQuestion;
+    </script>
+</body>
+</html>
