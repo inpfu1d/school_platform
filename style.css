@@ -1931,4 +1931,22 @@ body.has-breadcrumbs .main-content {
   .cards-grid--2 { grid-template-columns: 1fr; }
 
   #game-iframe { min-height: 450px; height: 60vh; }
+   
+}
+/* إصلاح الشعار وتكبيره بالقوة الجبرية */
+.header-brand {
+  cursor: pointer !important;
+}
+.logo-wrap {
+  width: 180px !important; /* عرض أكبر ليسمح بظهور النص */
+  height: 70px !important; /* ارتفاع أكبر قليلاً */
+  overflow: hidden !important;
+  display: flex !important;
+  flex-shrink: 0 !important;
+}
+.logo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  transform: scale(1.4) !important; /* خدعة التكبير الداخلي بنسبة 40% */
 }
